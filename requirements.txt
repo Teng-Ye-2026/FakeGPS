@@ -1,0 +1,2 @@
+# 本地 PC 调试界面用（安卓端由 buildozer.spec 的 requirements 控制）
+kivy==2.2.1
