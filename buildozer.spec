@@ -29,7 +29,6 @@ android.permissions = ACCESS_FINE_LOCATION,ACCESS_COARSE_LOCATION,INTERNET
 # 安卓编译版本
 android.api = 31
 android.minapi = 21
-android.sdk = 31
 # NDK 版本：Buildozer 默认 23b 太旧，p4a 要求 ≥ 25（推荐 28c）。
 # 25b 在 Buildozer 下载源与 p4a 兼容性上都稳妥。
 android.ndk = 25b
