@@ -7,19 +7,15 @@ on:
 
 jobs:
   build:
-    # 用 Ubuntu 22.04 而非 ubuntu-latest：
-    # 最新的 24.04 自带 autoconf 2.72 + libtool 2.4.7，与 python-for-android 内旧版
-    # libffi 的 configure.ac 不兼容，会导致 autoreconf 报 LT_SYS_SYMBOL_USCORE 而失败。
-    # 22.04 的 autoconf 2.71 + libtool 2.4.6 是 p4a 官方验证过的兼容组合。
     runs-on: ubuntu-22.04
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Set up Python
+      - name: Set up Python 3.11
         uses: actions/setup-python@v5
         with:
-          python-version: "3.10"
+          python-version: "3.11"
 
       - name: Install system dependencies
         run: |
@@ -29,11 +25,29 @@ jobs:
             libncurses-dev libtinfo-dev cmake \
             libffi-dev libssl-dev
 
-      - name: Install buildozer
-        run: pip install --upgrade buildozer "cython==0.29.33"
+      - name: Install buildozer (in a dedicated 3.11 venv)
+        run: |
+          python -m venv /opt/buildozer-venv
+          . /opt/buildozer-venv/bin/activate
+          python -m pip install --upgrade pip
+          python -m pip install buildozer "cython==0.29.33"
+
+      - name: Verify Python environment
+        run: |
+          . /opt/buildozer-venv/bin/activate
+          echo "=== Python version used to build (must be 3.11.x) ==="
+          python --version
+          which buildozer
+          python -m pip show buildozer | head -3
+          if ! python --version 2>&1 | grep -q "3.11"; then
+            echo "ERROR: expected Python 3.11 but got the version above. Aborting."
+            exit 1
+          fi
 
       - name: Build APK (debug)
-        run: buildozer -v android debug
+        run: |
+          . /opt/buildozer-venv/bin/activate
+          python -m buildozer -v android debug
         env:
           BUILDOZER_WARN_ON_ROOT: 0
 
